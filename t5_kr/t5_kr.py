@@ -17,8 +17,8 @@ from t5.data import TaskRegistry
 import functools
 
 DEFAULT_KR_VOCAB_PATH = "/home/jovyan/work/t5data/tokenizers/t5-notag-vocab.txt"  # GCS
-DEFAULT_KR_DATA_PATH = "gs://t5-kor/data/t5_multi.txt"
-DEFAULT_SPM_PATH = "gs://t5-kor/data/kr_32000.model"
+DEFAULT_KR_DATA_PATH = "gs://t5pretrain/data/t5_multi.txt"
+DEFAULT_SPM_PATH = "gs://t5pretrain/data/mecab_sp/tok_32k.model"
 DEFAULT_EXTRA_IDS = 100
 PAD_ID = 0
 EOS_ID = 1
