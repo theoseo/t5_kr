@@ -17,8 +17,8 @@ from t5.data import TaskRegistry
 import functools
 
 DEFAULT_KR_VOCAB_PATH = "/home/jovyan/work/t5data/tokenizers/t5-notag-vocab.txt"  # GCS
-DEFAULT_KR_DATA_PATH = "gs://t5pretrain/data/t5_multi.txt"
-DEFAULT_SPM_PATH = "gs://t5pretrain/data/mecab_sp/tok_32k.model"
+DEFAULT_KR_DATA_PATH = "gs://t5large/data/t5_multi_mecab.txt"
+DEFAULT_SPM_PATH = "gs://t5large/data/mecab_sp/tok_32k.model"
 DEFAULT_EXTRA_IDS = 100
 PAD_ID = 0
 EOS_ID = 1
@@ -297,8 +297,8 @@ class SentencePieceVocabulary(Vocabulary):
     return our_md5 == their_md5 and self.extra_ids == their_extra_ids    
     
 @gin.configurable
-def get_kr_vocabulary():
-    return SentencePieceVocabulary(DEFAULT_SPM_PATH, DEFAULT_EXTRA_IDS)
+def get_kr_vocabulary(sp_model_path, extra_ids=DEFAULT_EXTRA_IDS):
+    return SentencePieceVocabulary(sp_model_path, extra_ids)
 
     #return KorVocabulary(DEFAULT_KR_VOCAB_PATH, DEFAULT_EXTRA_IDS)
 
@@ -309,7 +309,7 @@ def kr_dataset_fn(split, shuffle_files=False):
     return ds
 
 
-default_vocabulary = get_kr_vocabulary()
+default_vocabulary = get_kr_vocabulary(DEFAULT_SPM_PATH)
 
 DEFAULT_OUTPUT_FEATURES = {
     "inputs": Feature(
