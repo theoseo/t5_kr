@@ -318,8 +318,6 @@ DEFAULT_OUTPUT_FEATURES = {
 }
 
 
-
-
 TaskRegistry.remove('kr_iid_denoising')
 TaskRegistry.add(
     "kr_iid_denoising",
@@ -330,3 +328,212 @@ TaskRegistry.add(
     token_preprocessor=preprocessors.iid_denoising,
     output_features=DEFAULT_OUTPUT_FEATURES,
     metric_fns=[])
+
+
+FINETUNE_OUTPUT_FEATURES = Feature(vocabulary=default_vocabulary)
+BASE_DIR = "gs://t5kornlu"
+
+nli_tsv_path = {
+    "train": os.path.join("gs://t5kornlu/nli/data", "mecab_nli_train.tsv"),
+    "validation": os.path.join("gs://t5kornlu/nli/data", "mecab_nli_dev.tsv"),
+}
+
+def get_nli_fn(split, shuffle_files=False):
+    del shuffle_files
+    ds = tf.data.TextLineDataset(nli_tsv_path[split])
+    ds = ds.map(
+        functools.partial(tf.io.decode_csv, record_defaults=["", ""],
+                          field_delim="\t", use_quote_delim=False),
+        num_parallel_calls=tf.data.experimental.AUTOTUNE)
+    ds = ds.map(lambda *ex: dict(zip(["inputs", "targets"], ex)))
+    return ds
+
+def nli_preprocessor(ds):
+    def normalize_text(text):
+        """Lowercase"""
+        text = tf.strings.lower(text)
+        return text
+        
+
+    def to_inputs_and_targets(ex):
+        return {
+            "inputs":
+                tf.strings.join(
+                    ["nli ", normalize_text(ex["inputs"])]),
+            "targets": normalize_text(ex["targets"])
+        }
+    return ds.map(to_inputs_and_targets,
+                  num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
+TaskRegistry.remove('nli')
+TaskRegistry.add(
+    "nli",
+    dataset_fn=get_nli_fn,
+    splits=['train', 'validation'],
+    text_preprocessor=[nli_preprocessor],
+    output_features=FINETUNE_OUTPUT_FEATURES,
+    metric_fns=[t5.evaluation.metrics.accuracy])                      
+
+korquad_tsv_path = {
+    "train": os.path.join("gs://t5kornlu/korquad1.0/data", "korquad_mecab_train.tsv"),
+    "validation": os.path.join("gs://t5kornlu/korquad1.0/data", "korquad_mecab_dev.tsv"),
+}
+
+def get_korquad_fn(split, shuffle_files=False):
+    del shuffle_files
+    ds = tf.data.TextLineDataset(korquad_tsv_path[split])
+    ds = ds.map(
+        functools.partial(tf.io.decode_csv, record_defaults=["", ""],
+                          field_delim="\t", use_quote_delim=False),
+        num_parallel_calls=tf.data.experimental.AUTOTUNE)
+    ds = ds.map(lambda *ex: dict(zip(["inputs", "targets"], ex)))
+    return ds
+
+def korquad_preprocessor(ds):
+    def normalize_text(text):
+        """Lowercase"""
+        text = tf.strings.lower(text)
+        return text
+        
+
+    def to_inputs_and_targets(ex):
+        return {
+            "inputs":
+                tf.strings.join(
+                    ["korquad ", normalize_text(ex["inputs"])]),
+            "targets": normalize_text(ex["targets"])
+        }
+    return ds.map(to_inputs_and_targets,
+                  num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
+TaskRegistry.remove('korquad1.0')
+TaskRegistry.add(
+    "korquad1.0",
+    dataset_fn=get_korquad_fn,
+    splits=['train', 'validation'],
+    text_preprocessor=[korquad_preprocessor],
+    output_features=FINETUNE_OUTPUT_FEATURES,
+    metric_fns=[t5.evaluation.metrics.accuracy])
+
+stsb_tsv_path = {
+    "train": os.path.join("gs://t5kornlu/stsb/data", "mecab_stsb_train.tsv"),
+    "validation": os.path.join("gs://t5kornlu/stsb/data", "mecab_stsb_dev.tsv"),
+}
+
+def get_stsb_fn(split, shuffle_files=False):
+    del shuffle_files
+    ds = tf.data.TextLineDataset(stsb_tsv_path[split])
+    ds = ds.map(
+        functools.partial(tf.io.decode_csv, record_defaults=["", ""],
+                          field_delim="\t", use_quote_delim=False),
+        num_parallel_calls=tf.data.experimental.AUTOTUNE)
+    ds = ds.map(lambda *ex: dict(zip(["inputs", "targets"], ex)))
+    return ds
+
+def stsb_preprocessor(ds):
+    def normalize_text(text):
+        """Lowercase"""
+        text = tf.strings.lower(text)
+        return text
+        
+
+    def to_inputs_and_targets(ex):
+        return {
+            "inputs":
+                tf.strings.join(
+                    ["stsb ", normalize_text(ex["inputs"])]),
+            "targets": normalize_text(ex["targets"])
+        }
+    return ds.map(to_inputs_and_targets,
+                  num_parallel_calls=tf.data.experimental.AUTOTUNE)  
+
+TaskRegistry.remove('stsb')
+TaskRegistry.add(
+    "stsb",
+    dataset_fn=get_stsb_fn,
+    splits=['train', 'validation'],
+    text_preprocessor=[stsb_preprocessor],
+    output_features=FINETUNE_OUTPUT_FEATURES,
+    metric_fns=[t5.evaluation.metrics.spearman_corrcoef])
+
+hate_tsv_path = {
+    "train": os.path.join("gs://t5kornlu/hate-speech/data", "mecab_hate_train.tsv"),
+    "validation": os.path.join("gs://t5kornlu/hate-speech/data", "mecab_hate_dev.tsv"),
+}
+
+def get_hate_fn(split, shuffle_files=False):
+    del shuffle_files
+    ds = tf.data.TextLineDataset(hate_tsv_path[split])
+    ds = ds.map(
+        functools.partial(tf.io.decode_csv, record_defaults=["", ""],
+                          field_delim="\t", use_quote_delim=False),
+        num_parallel_calls=tf.data.experimental.AUTOTUNE)
+    ds = ds.map(lambda *ex: dict(zip(["inputs", "targets"], ex)))
+    return ds
+
+def hate_preprocessor(ds):
+    def normalize_text(text):
+        """Lowercase"""
+        text = tf.strings.lower(text)
+        return text
+        
+
+    def to_inputs_and_targets(ex):
+        return {
+            "inputs":
+                tf.strings.join(
+                    ["hatespeech: ", normalize_text(ex["inputs"])]),
+            "targets": normalize_text(ex["targets"])
+        }
+    return ds.map(to_inputs_and_targets,
+                  num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
+TaskRegistry.remove('hate')
+TaskRegistry.add(
+    "hate",
+    dataset_fn=get_hate_fn,
+    splits=['train', 'validation'],
+    text_preprocessor=[hate_preprocessor],
+    output_features=FINETUNE_OUTPUT_FEATURES,
+    metric_fns=[t5.evaluation.metrics.accuracy, \
+                t5.evaluation.metrics.sklearn_metrics_wrapper("f1_score", average="macro")])
+
+nsmc_tsv_path = {
+    "train": os.path.join("gs://t5kornlu/nsmc/data", "mecabsp_ratings_train.tsv"),
+    "validation": os.path.join("gs://t5kornlu/nsmc/data", "mecabsp_ratings_test.tsv"),
+}
+
+def get_nsmc_fn(split, shuffle_files=False):
+    del shuffle_files
+    ds = tf.data.TextLineDataset(nsmc_tsv_path[split])
+    ds = ds.map(
+        functools.partial(tf.io.decode_csv, record_defaults=["", ""],
+                          field_delim="\t", use_quote_delim=False),
+        num_parallel_calls=tf.data.experimental.AUTOTUNE)
+    ds = ds.map(lambda *ex: dict(zip(["inputs", "targets"], ex)))
+    return ds
+
+def nsmc_preprocessor(ds):
+    def normalize_text(text):
+        """Lowercase"""
+        text = tf.strings.lower(text)
+        return text
+        
+
+    def to_inputs_and_targets(ex):
+        return {
+            "inputs":
+                tf.strings.join(
+                    ["nsmc: ", normalize_text(ex["inputs"])]),
+            "targets": normalize_text(ex["targets"])
+        }
+    return ds.map(to_inputs_and_targets,
+                  num_parallel_calls=tf.data.experimental.AUTOTUNE)
+TaskRegistry.remove('nsmc')
+TaskRegistry.add(
+    "nsmc",
+    dataset_fn=get_nsmc_fn,
+    splits=['train', 'validation'],
+    text_preprocessor=[nsmc_preprocessor],
+    output_features=FINETUNE_OUTPUT_FEATURES,
+    metric_fns=[t5.evaluation.metrics.accuracy])
