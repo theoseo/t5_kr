@@ -372,7 +372,7 @@ TaskRegistry.add(
     splits=['train', 'validation'],
     text_preprocessor=[nli_preprocessor],
     output_features=FINETUNE_OUTPUT_FEATURES,
-    metric_fns=[t5.evaluation.metrics.accuracy])                      
+    metric_fns=[t5.evaluation.metrics.spearman_corrcoef])                      
 
 korquad_tsv_path = {
     "train": os.path.join("gs://t5kornlu/korquad1.0/data", "korquad_mecab_train.tsv"),
