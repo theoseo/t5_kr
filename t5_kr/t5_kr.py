@@ -546,7 +546,7 @@ qpair_tsv_path = {
 
 def get_qpair_fn(split, shuffle_files=False):
     del shuffle_files
-    ds = tf.data.TextLineDataset(qpair_mecab_path[split])
+    ds = tf.data.TextLineDataset(qpair_tsv_path[split])
     ds = ds.map(
         functools.partial(tf.io.decode_csv, record_defaults=["", ""],
                           field_delim="\t", use_quote_delim=False),
