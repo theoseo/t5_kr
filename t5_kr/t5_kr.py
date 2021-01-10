@@ -565,7 +565,7 @@ def qpair_preprocessor(ds):
         return {
             "inputs":
                 tf.strings.join(
-                    ["question pair: ", normalize_text(ex["inputs"])]),
+                    ["qpair ", normalize_text(ex["inputs"])]),
             "targets": normalize_text(ex["targets"])
         }
     return ds.map(to_inputs_and_targets,
