@@ -1,7 +1,7 @@
 import gin
 import t5
 import abc
-
+import os
 import hashlib
 from typing import Iterable, List, Optional, Sequence
 
@@ -297,7 +297,7 @@ class SentencePieceVocabulary(Vocabulary):
     return our_md5 == their_md5 and self.extra_ids == their_extra_ids    
     
 @gin.configurable
-def get_kr_vocabulary(sp_model_path, extra_ids=DEFAULT_EXTRA_IDS):
+def get_kr_vocabulary(sp_model_path=DEFAULT_SPM_PATH, extra_ids=DEFAULT_EXTRA_IDS):
     return SentencePieceVocabulary(sp_model_path, extra_ids)
 
     #return KorVocabulary(DEFAULT_KR_VOCAB_PATH, DEFAULT_EXTRA_IDS)
