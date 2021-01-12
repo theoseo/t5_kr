@@ -579,3 +579,45 @@ TaskRegistry.add(
     text_preprocessor=[qpair_preprocessor],
     output_features=FINETUNE_OUTPUT_FEATURES,
     metric_fns=[t5.evaluation.metrics.accuracy])
+
+# ADD Summary Data
+summary_tsv_path = {
+    "train": os.path.join("gs://t5kornlu/summary/data", "abstractive_train.tsv"),
+    "validation": os.path.join("gs://t5kornlu/summary/data", "abstractive_test.tsv"),
+}
+
+def get_summary_fn(split, shuffle_files=False):
+    del shuffle_files
+    ds = tf.data.TextLineDataset(summary_tsv_path[split])
+    ds = ds.map(
+        functools.partial(tf.io.decode_csv, record_defaults=["", ""],
+                          field_delim="\t", use_quote_delim=False),
+        num_parallel_calls=tf.data.experimental.AUTOTUNE)
+    ds = ds.map(lambda *ex: dict(zip(["inputs", "targets"], ex)))
+    return ds
+
+def summary_preprocessor(ds):
+    def normalize_text(text):
+        """Lowercase"""
+        text = tf.strings.lower(text)
+        return text
+        
+
+    def to_inputs_and_targets(ex):
+        return {
+            "inputs":
+                tf.strings.join(
+                    ["summarize: ", normalize_text(ex["inputs"])]),
+            "targets": normalize_text(ex["targets"])
+        }
+    return ds.map(to_inputs_and_targets,
+                  num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
+TaskRegistry.remove('summary')
+TaskRegistry.add(
+    "summary",
+    dataset_fn=get_summary_fn,
+    splits=['train', 'validation'],
+    text_preprocessor=[summary_preprocessor],
+    output_features=FINETUNE_OUTPUT_FEATURES,
+    metric_fns=[t5.evaluation.metrics.rouge])
